@@ -3,78 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator Gizi & Diet Plan</title>
+    <title>Sobat Diet - Kalkulator Gizi & MyPlate</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; }
-        .box { border: 1px solid #ccc; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
-        input, select, button { width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; }
-        button { background-color: #28a745; color: white; border: none; font-weight: bold; cursor: pointer; }
-        .btn-ad { background-color: #dc3545; }
-        #ad-step, #result-step { display: none; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; color: #333; }
+        .container { max-width: 450px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #2c3e50; }
+        .box { display: none; }
+        .active { display: block; }
+        label { font-weight: bold; margin-top: 10px; display: block; font-size: 14px; }
+        input, select, button { width: 100%; padding: 12px; margin: 8px 0 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
+        button { background-color: #27ae60; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background-color: #219150; }
+        .btn-ad { background-color: #e74c3c; animation: pulse 1.5s infinite; }
+        
+        /* Animasi kedip untuk tombol iklan biar menarik perhatian */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        
+        .loading-text { text-align: center; font-size: 18px; font-weight: bold; color: #f39c12; margin: 20px 0; }
+        .myplate-box { background-color: #eafaf1; padding: 15px; border-radius: 8px; border-left: 5px solid #27ae60; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-    <h2>Kalkulator Gizi Harian 🥗</h2>
+    <div class="container">
+        <h2>Piring Gizi Kamu 🍽️</h2>
 
-    <!-- Form Input Data -->
-    <div class="box" id="form-step">
-        <label>Berat Badan (kg):</label>
-        <input type="number" id="berat" placeholder="Contoh: 60">
+        <!-- Tahap 1: Form Input Data -->
+        <div class="box active" id="form-step">
+            <p style="text-align: center; font-size: 14px; color: #666;">Isi data di bawah untuk mendapatkan panduan porsi makan MyPlate kamu.</p>
+            
+            <label>Gender:</label>
+            <select id="gender">
+                <option value="pria">Pria</option>
+                <option value="wanita">Wanita</option>
+            </select>
 
-        <label>Tinggi Badan (cm):</label>
-        <input type="number" id="tinggi" placeholder="Contoh: 165">
+            <label>Umur (tahun):</label>
+            <input type="number" id="umur" placeholder="Contoh: 22">
 
-        <button onclick="prosesData()">Hitung Kebutuhan Gizi</button>
-    </div>
+            <label>Berat Badan (kg):</label>
+            <input type="number" id="berat" placeholder="Contoh: 60">
 
-    <!-- Step Wajib Klik Iklan -->
-    <div class="box" id="ad-step">
-        <h3>Sedang menyusun plan... ⏳</h3>
-        <p>Data kamu sudah dihitung! Silakan klik tombol di bawah untuk membuka hasil Diet Plan kamu.</p>
-        <!-- Ganti LINK_ADSTERRA_KAMU_DISINI dengan Direct Link dari Adsterra -->
-        <button class="btn-ad" onclick="bukaIklanDanHasil('https://www.effectivecpmnetwork.com/js1ip6jjb?key=d8aecb0b878fdfd0ca5ab38f0bdeefe4')">Buka Hasil Plan Saya</button>
-    </div>
+            <label>Tinggi Badan (cm):</label>
+            <input type="number" id="tinggi" placeholder="Contoh: 165">
 
-    <!-- Hasil Kalkulasi (Awalnya Disembunyikan) -->
-    <div class="box" id="result-step">
-        <h3>✅ Hasil Plan Gizi Kamu</h3>
-        <p id="hasil-teks"></p>
-        <p><strong>Tips:</strong> Perbanyak minum air putih dan jaga pola tidur!</p>
+            <label>Level Aktivitas:</label>
+            <select id="aktivitas">
+                <option value="1.2">Jarang Olahraga</option>
+                <option value="1.375">Olahraga Ringan (1-3x seminggu)</option>
+                <option value="1.55">Olahraga Sedang (3-5x seminggu)</option>
+            </select>
+
+            <button onclick="mulaiHitung()">Hitung Meal Plan Saya</button>
+        </div>
+
+        <!-- Tahap 2: Fake Loading -->
+        <div class="box" id="loading-step">
+            <div class="loading-text" id="teks-loading">Menganalisis Indeks Massa Tubuh... ⏳</div>
+        </div>
+
+        <!-- Tahap 3: Wajib Klik Iklan -->
+        <div class="box" id="ad-step">
+            <h3 style="text-align: center;">✅ Meal Plan Sudah Siap!</h3>
+            <p style="text-align: center; color: #555;">Kebutuhan kalori harian dan pembagian porsi piring makan (MyPlate) kamu berhasil disusun.</p>
+            
+            <div style="background-color: #fdf2e9; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 15px;">
+                🔒 <strong>Sistem Terkunci</strong><br>
+                <small>Bantu support server kami dengan klik tombol di bawah. Hasil akan otomatis terbuka setelah diklik.</small>
+            </div>
+
+            <!-- Tombol Adsterra -->
+            <button class="btn-ad" onclick="bukaIklanDanHasil('https://www.effectivecpmnetwork.com/js1ip6jjb?key=d8aecb0b878fdfd0ca5ab38f0bdeefe4')">
+                🔓 Buka Kunci Hasil Plan Saya
+            </button>
+        </div>
+
+        <!-- Tahap 4: Hasil Kalkulasi -->
+        <div class="box" id="result-step">
+            <h3>🎯 Target Harian Kamu</h3>
+            <p id="hasil-kalori" style="font-size: 18px; font-weight: bold; color: #e67e22;"></p>
+            
+            <div class="myplate-box">
+                <h4>Panduan Isi Piringku (MyPlate) 🥗</h4>
+                <p>Saat makan besar, bagilah piringmu menjadi:</p>
+                <ul style="padding-left: 20px;">
+                    <li><strong>50% (Setengah Piring):</strong> Sayuran beraneka warna dan Buah-buahan segar.</li>
+                    <li><strong>25% (Seperempat Piring):</strong> Karbohidrat kompleks (nasi merah, kentang, oat, roti gandum).</li>
+                    <li><strong>25% (Seperempat Piring):</strong> Protein sehat (dada ayam, ikan, telur, tahu, tempe).</li>
+                </ul>
+                <p><em>*Jangan lupa minum air putih minimal 2-3 liter sehari!</em></p>
+            </div>
+        </div>
     </div>
 
     <script>
-        let kaloriHarian = 0;
+        let kaloriTotal = 0;
 
-        // Fungsi saat user klik tombol Hitung
-        function prosesData() {
+        function mulaiHitung() {
+            let u = document.getElementById("umur").value;
             let b = document.getElementById("berat").value;
             let t = document.getElementById("tinggi").value;
+            let g = document.getElementById("gender").value;
+            let a = document.getElementById("aktivitas").value;
 
-            if (b == "" || t == "") {
-                alert("Isi berat dan tinggi badan dulu, ya!");
+            if (u == "" || b == "" || t == "") {
+                alert("Lengkapi semua data dulu ya!");
                 return;
             }
 
-            // Rumus BMR super sederhana (bisa kamu ganti dengan rumus Harris-Benedict yang asli)
-            kaloriHarian = (b * 10) + (t * 6.25) + 500; 
+            // Rumus BMR (Mifflin-St Jeor) biar lebih akurat
+            let bmr = 0;
+            if (g === "pria") {
+                bmr = (10 * b) + (6.25 * t) - (5 * u) + 5;
+            } else {
+                bmr = (10 * b) + (6.25 * t) - (5 * u) - 161;
+            }
 
-            // Sembunyikan form, munculkan tombol iklan
-            document.getElementById("form-step").style.display = "none";
-            document.getElementById("ad-step").style.display = "block";
+            // Hitung TDEE (Total Kalori Harian)
+            kaloriTotal = Math.round(bmr * parseFloat(a));
+
+            // Sembunyikan form, mulai fake loading
+            document.getElementById("form-step").classList.remove("active");
+            document.getElementById("loading-step").classList.add("active");
+
+            // Efek ganti teks tiap 1.5 detik
+            setTimeout(() => { document.getElementById("teks-loading").innerText = "Menyusun rasio MyPlate... 📊"; }, 1500);
+            setTimeout(() => { document.getElementById("teks-loading").innerText = "Mencari rekomendasi kalori terbaik... 🔍"; }, 3000);
+            
+            // Setelah 4.5 detik, munculin tombol iklan
+            setTimeout(() => {
+                document.getElementById("loading-step").classList.remove("active");
+                document.getElementById("ad-step").classList.add("active");
+            }, 4500);
         }
 
-        // Fungsi saat user klik tombol Buka Hasil (Sistem Adsterra)
         function bukaIklanDanHasil(adLink) {
-            // 1. Buka iklan Adsterra di tab baru
+            // Buka Iklan Adsterra
             window.open(adLink, '_blank');
 
-            // 2. Ubah tampilan web kita untuk menampilkan hasil
-            document.getElementById("ad-step").style.display = "none";
-            document.getElementById("result-step").style.display = "block";
+            // Buka Hasil di halaman ini
+            document.getElementById("ad-step").classList.remove("active");
+            document.getElementById("result-step").classList.add("active");
             
-            // 3. Tampilkan hasil angkanya
-            document.getElementById("hasil-teks").innerHTML = "Estimasi kebutuhan kalori harian kamu adalah: <strong>" + kaloriHarian + " Kkal</strong>. Kamu bisa defisit 300-500 kalori jika ingin menurunkan berat badan.";
+            document.getElementById("hasil-kalori").innerHTML = "Kebutuhan Kalori Harian: " + kaloriTotal + " Kkal🔥";
         }
     </script>
 
