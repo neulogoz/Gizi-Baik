@@ -3,155 +3,313 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sobat Diet - Kalkulator Gizi & MyPlate</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; color: #333; }
-        .container { max-width: 450px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #2c3e50; }
-        .box { display: none; }
-        .active { display: block; }
-        label { font-weight: bold; margin-top: 10px; display: block; font-size: 14px; }
-        input, select, button { width: 100%; padding: 12px; margin: 8px 0 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
-        button { background-color: #27ae60; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { background-color: #219150; }
-        .btn-ad { background-color: #e74c3c; animation: pulse 1.5s infinite; }
-        
-        /* Animasi kedip untuk tombol iklan biar menarik perhatian */
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
+    <title>Kalkulator Gizi MyPlate</title>
+    <!-- Font Premium dari Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS (Biar tampilan sama persis kayak web aslinya tanpa perlu file CSS terpisah) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { heading: ['"Bricolage Grotesque"', 'sans-serif'], sans: ['Inter', 'sans-serif'] },
+                    colors: { primary: '#059669', 'primary-hover': '#047857' }
+                }
+            }
         }
-        
-        .loading-text { text-align: center; font-size: 18px; font-weight: bold; color: #f39c12; margin: 20px 0; }
-        .myplate-box { background-color: #eafaf1; padding: 15px; border-radius: 8px; border-left: 5px solid #27ae60; margin-top: 15px; }
+    </script>
+    <style>
+        .step-box { display: none; opacity: 0; transition: opacity 0.5s ease-in-out; }
+        .step-box.active { display: block; opacity: 1; }
+        .emoji-icon { font-size: 2.5rem; line-height: 1; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+        .pulse-btn { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { transform: scale(1.03); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
     </style>
 </head>
-<body>
+<body class="bg-stone-50 text-stone-800 font-sans antialiased selection:bg-emerald-200">
 
-    <div class="container">
-        <h2>Piring Gizi Kamu 🍽️</h2>
-
-        <!-- Tahap 1: Form Input Data -->
-        <div class="box active" id="form-step">
-            <p style="text-align: center; font-size: 14px; color: #666;">Isi data di bawah untuk mendapatkan panduan porsi makan MyPlate kamu.</p>
-            
-            <label>Gender:</label>
-            <select id="gender">
-                <option value="pria">Pria</option>
-                <option value="wanita">Wanita</option>
-            </select>
-
-            <label>Umur (tahun):</label>
-            <input type="number" id="umur" placeholder="Contoh: 22">
-
-            <label>Berat Badan (kg):</label>
-            <input type="number" id="berat" placeholder="Contoh: 60">
-
-            <label>Tinggi Badan (cm):</label>
-            <input type="number" id="tinggi" placeholder="Contoh: 165">
-
-            <label>Level Aktivitas:</label>
-            <select id="aktivitas">
-                <option value="1.2">Jarang Olahraga</option>
-                <option value="1.375">Olahraga Ringan (1-3x seminggu)</option>
-                <option value="1.55">Olahraga Sedang (3-5x seminggu)</option>
-            </select>
-
-            <button onclick="mulaiHitung()">Hitung Meal Plan Saya</button>
-        </div>
-
-        <!-- Tahap 2: Fake Loading -->
-        <div class="box" id="loading-step">
-            <div class="loading-text" id="teks-loading">Menganalisis Indeks Massa Tubuh... ⏳</div>
-        </div>
-
-        <!-- Tahap 3: Wajib Klik Iklan -->
-        <div class="box" id="ad-step">
-            <h3 style="text-align: center;">✅ Meal Plan Sudah Siap!</h3>
-            <p style="text-align: center; color: #555;">Kebutuhan kalori harian dan pembagian porsi piring makan (MyPlate) kamu berhasil disusun.</p>
-            
-            <div style="background-color: #fdf2e9; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 15px;">
-                🔒 <strong>Sistem Terkunci</strong><br>
-                <small>Bantu support server kami dengan klik tombol di bawah. Hasil akan otomatis terbuka setelah diklik.</small>
+    <!-- Header -->
+    <div class="bg-gradient-to-br from-emerald-50 via-emerald-100 to-amber-50 pb-12 pt-8 px-4 rounded-b-[3rem] shadow-sm">
+        <div class="max-w-2xl mx-auto text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/70 backdrop-blur text-xs font-bold text-emerald-800 mb-4 shadow-sm">
+                🛡️ Standar Gizi USDA 2026
             </div>
-
-            <!-- Tombol Adsterra -->
-            <button class="btn-ad" onclick="bukaIklanDanHasil('https://www.effectivecpmnetwork.com/js1ip6jjb?key=d8aecb0b878fdfd0ca5ab38f0bdeefe4')">
-                🔓 Buka Kunci Hasil Plan Saya
-            </button>
-        </div>
-
-        <!-- Tahap 4: Hasil Kalkulasi -->
-        <div class="box" id="result-step">
-            <h3>🎯 Target Harian Kamu</h3>
-            <p id="hasil-kalori" style="font-size: 18px; font-weight: bold; color: #e67e22;"></p>
-            
-            <div class="myplate-box">
-                <h4>Panduan Isi Piringku (MyPlate) 🥗</h4>
-                <p>Saat makan besar, bagilah piringmu menjadi:</p>
-                <ul style="padding-left: 20px;">
-                    <li><strong>50% (Setengah Piring):</strong> Sayuran beraneka warna dan Buah-buahan segar.</li>
-                    <li><strong>25% (Seperempat Piring):</strong> Karbohidrat kompleks (nasi merah, kentang, oat, roti gandum).</li>
-                    <li><strong>25% (Seperempat Piring):</strong> Protein sehat (dada ayam, ikan, telur, tahu, tempe).</li>
-                </ul>
-                <p><em>*Jangan lupa minum air putih minimal 2-3 liter sehari!</em></p>
-            </div>
+            <h1 class="font-heading text-4xl sm:text-5xl font-extrabold tracking-tight text-stone-900 mb-4">
+                Kalkulator <span class="text-primary">MyPlate</span>
+            </h1>
+            <p class="text-stone-600 text-sm sm:text-base max-w-lg mx-auto">
+                Hitung kebutuhan kalori harian dan target porsi makanmu secara akurat.
+            </p>
         </div>
     </div>
 
+    <div class="max-w-2xl mx-auto px-4 -mt-6 relative z-10 pb-20">
+        
+        <!-- ========================================== -->
+        <!-- TAHAP 1: FORM INPUT -->
+        <!-- ========================================== -->
+        <div id="step-form" class="step-box active bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-stone-100">
+            <h2 class="font-heading text-xl font-bold mb-6 border-b pb-4">📝 Isi Data Tubuhmu</h2>
+            
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-xs font-bold text-stone-500 uppercase tracking-wide mb-2">Gender</label>
+                    <select id="gender" class="w-full p-3 rounded-xl bg-stone-50 border border-stone-200 focus:ring-2 focus:ring-primary outline-none transition font-semibold">
+                        <option value="male">Pria</option>
+                        <option value="female">Wanita</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-stone-500 uppercase tracking-wide mb-2">Umur</label>
+                    <input type="number" id="age" placeholder="Cth: 22" class="w-full p-3 rounded-xl bg-stone-50 border border-stone-200 focus:ring-2 focus:ring-primary outline-none transition font-semibold">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label class="block text-xs font-bold text-stone-500 uppercase tracking-wide mb-2">Berat (kg)</label>
+                    <input type="number" id="weight" placeholder="Cth: 65" class="w-full p-3 rounded-xl bg-stone-50 border border-stone-200 focus:ring-2 focus:ring-primary outline-none transition font-semibold">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-stone-500 uppercase tracking-wide mb-2">Tinggi (cm)</label>
+                    <input type="number" id="height" placeholder="Cth: 170" class="w-full p-3 rounded-xl bg-stone-50 border border-stone-200 focus:ring-2 focus:ring-primary outline-none transition font-semibold">
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <label class="block text-xs font-bold text-stone-500 uppercase tracking-wide mb-3">Tingkat Aktivitas (Activity Level)</label>
+                <div class="space-y-3">
+                    <label class="flex items-center gap-4 p-4 rounded-2xl border-2 border-stone-100 hover:border-emerald-300 bg-white cursor-pointer transition">
+                        <input type="radio" name="activity" value="1.2" checked class="w-5 h-5 text-primary focus:ring-primary">
+                        <div>
+                            <div class="font-heading font-bold text-stone-800">Sedentary (Jarang Gerak)</div>
+                            <div class="text-xs text-stone-500">Kerja kantoran, rebahan, tugas ringan.</div>
+                        </div>
+                        <div class="ml-auto text-3xl">🚶</div>
+                    </label>
+                    <label class="flex items-center gap-4 p-4 rounded-2xl border-2 border-stone-100 hover:border-emerald-300 bg-white cursor-pointer transition">
+                        <input type="radio" name="activity" value="1.53" class="w-5 h-5 text-primary focus:ring-primary">
+                        <div>
+                            <div class="font-heading font-bold text-stone-800">Moderately Active (Sedang)</div>
+                            <div class="text-xs text-stone-500">Jalan cepat 30 mnt/hari, aktivitas normal.</div>
+                        </div>
+                        <div class="ml-auto text-3xl">🚴</div>
+                    </label>
+                    <label class="flex items-center gap-4 p-4 rounded-2xl border-2 border-stone-100 hover:border-emerald-300 bg-white cursor-pointer transition">
+                        <input type="radio" name="activity" value="1.76" class="w-5 h-5 text-primary focus:ring-primary">
+                        <div>
+                            <div class="font-heading font-bold text-stone-800">Active (Aktif/Berat)</div>
+                            <div class="text-xs text-stone-500">Olahraga berat, gym, pekerja lapangan.</div>
+                        </div>
+                        <div class="ml-auto text-3xl">🏃</div>
+                    </label>
+                </div>
+            </div>
+
+            <button onclick="startCalculation()" class="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-stone-900 text-white font-heading font-bold text-lg shadow-lg hover:-translate-y-1 hover:shadow-xl transition-all">
+                🧮 Hitung Meal Plan Saya
+            </button>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAHAP 2: FAKE LOADING -->
+        <!-- ========================================== -->
+        <div id="step-loading" class="step-box bg-white rounded-3xl p-10 shadow-xl border border-stone-100 text-center">
+            <div class="inline-block animate-spin text-5xl mb-4">⚙️</div>
+            <h3 id="loading-text" class="font-heading text-2xl font-bold text-stone-800 mb-2">Menghitung IOM Equations...</h3>
+            <p class="text-stone-500 text-sm">Menyesuaikan target kalori harian dan panduan porsi MyPlate kamu.</p>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAHAP 3: ADSTERRA LOCK -->
+        <!-- ========================================== -->
+        <div id="step-lock" class="step-box bg-white rounded-3xl p-8 shadow-xl border-2 border-emerald-500 text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-emerald-500"></div>
+            <div class="text-6xl mb-4">✅</div>
+            <h3 class="font-heading text-3xl font-extrabold text-stone-900 mb-2">Hasil Kamu Selesai!</h3>
+            <p class="text-stone-600 mb-6 bg-amber-50 p-4 rounded-xl border border-amber-200">
+                🔒 <strong>Sistem Terkunci</strong><br>
+                <span class="text-sm">Untuk membuka BMI dan detail piring makanmu, bantu dukung server kami dengan mengklik tombol di bawah. (Hasil otomatis terbuka).</span>
+            </p>
+            <button onclick="unlockResults('https://www.effectivecpmnetwork.com/js1ip6jjb?key=d8aecb0b878fdfd0ca5ab38f0bdeefe4')" class="pulse-btn w-full px-6 py-4 rounded-xl bg-red-500 hover:bg-red-600 text-white font-heading font-bold text-lg shadow-lg shadow-red-500/30 transition-all">
+                🔓 BUKA KUNCI HASIL SAYA
+            </button>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAHAP 4: RESULTS (TAMPILAN PREMIUM) -->
+        <!-- ========================================== -->
+        <div id="step-results" class="step-box space-y-6">
+            
+            <!-- Card 1: Calories -->
+            <div class="rounded-3xl p-8 sm:p-10 shadow-lg relative overflow-hidden bg-gradient-to-br from-emerald-800 to-emerald-950 text-white">
+                <div class="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
+                <div class="relative z-10">
+                    <span class="inline-block px-3 py-1.5 rounded-full bg-white/20 text-xs font-bold tracking-widest uppercase mb-4">Kebutuhan Kalori Harian</span>
+                    <div class="flex items-center gap-4 mb-2">
+                        <span class="text-5xl">🔥</span>
+                        <div class="font-heading text-6xl font-extrabold tracking-tight"><span id="res-calories">0</span></div>
+                        <div class="text-sm font-medium text-emerald-200 mt-4">Kkal/Hari</div>
+                    </div>
+                    <p class="text-emerald-100/80 text-sm mt-2">Untuk mempertahankan berat badan saat ini.</p>
+                </div>
+            </div>
+
+            <!-- Card 2: BMI -->
+            <div class="rounded-3xl p-8 sm:p-10 bg-white shadow-lg border border-stone-100 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                <div>
+                    <span class="inline-block px-3 py-1.5 rounded-full bg-stone-100 text-stone-500 text-xs font-bold tracking-widest uppercase mb-2">Body Mass Index</span>
+                    <div class="flex items-baseline gap-3">
+                        <div class="font-heading text-5xl font-extrabold text-stone-900"><span id="res-bmi">0</span></div>
+                        <div id="res-bmi-badge" class="px-3 py-1 rounded-full text-xs font-bold text-white bg-emerald-500">Normal</div>
+                    </div>
+                </div>
+                <!-- SVG BMI GAUGE MURNI -->
+                <div class="w-full max-w-[200px] mx-auto sm:mx-0">
+                    <svg viewBox="0 0 240 130" class="w-full h-full drop-shadow-md">
+                        <path d="M 35 110 A 85 85 0 0 1 40.6 79.5" fill="none" stroke="#60A5FA" stroke-width="16" stroke-linecap="round"></path>
+                        <path d="M 40.6 79.5 A 85 85 0 0 1 77.5 36.3" fill="none" stroke="#4ADE80" stroke-width="16" stroke-linecap="round"></path>
+                        <path d="M 77.5 36.3 A 85 85 0 0 1 120 25" fill="none" stroke="#FBBF24" stroke-width="16" stroke-linecap="round"></path>
+                        <path d="M 120 25 A 85 85 0 0 1 205 110" fill="none" stroke="#F87171" stroke-width="16" stroke-linecap="round"></path>
+                        <!-- Jarum / Needle -->
+                        <line id="bmi-needle" x1="120" y1="110" x2="120" y2="35" stroke="#1c1c1c" stroke-width="3" stroke-linecap="round"></line>
+                        <circle cx="120" cy="110" r="6" fill="#1c1c1c"></circle>
+                        <circle cx="120" cy="110" r="3" fill="white"></circle>
+                        <text x="28" y="125" class="text-[10px] font-bold" fill="#a8a29e" text-anchor="middle">15</text>
+                        <text x="120" y="10" class="text-[10px] font-bold" fill="#a8a29e" text-anchor="middle">30</text>
+                        <text x="212" y="125" class="text-[10px] font-bold" fill="#a8a29e" text-anchor="middle">45</text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Card 3: Daily Plate (Porsi) -->
+            <div class="rounded-3xl p-8 bg-white shadow-lg border border-stone-100">
+                <div class="text-center mb-8">
+                    <h3 class="font-heading text-2xl font-extrabold text-stone-900">Porsi Piring Harianmu</h3>
+                    <p class="text-sm text-stone-500 mt-1">Berdasarkan Standar U.S. Healthy Plate 🍽️</p>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex items-center gap-4 bg-stone-50 p-4 rounded-2xl border border-stone-100">
+                        <span class="emoji-icon">🌾</span>
+                        <div><div class="text-xs text-stone-500 font-bold uppercase">Karbohidrat</div><div class="font-heading font-extrabold text-xl text-amber-600"><span id="p-grain">0</span> <span class="text-xs">porsi</span></div></div>
+                    </div>
+                    <div class="flex items-center gap-4 bg-stone-50 p-4 rounded-2xl border border-stone-100">
+                        <span class="emoji-icon">🍗</span>
+                        <div><div class="text-xs text-stone-500 font-bold uppercase">Protein</div><div class="font-heading font-extrabold text-xl text-violet-600"><span id="p-protein">0</span> <span class="text-xs">porsi</span></div></div>
+                    </div>
+                    <div class="flex items-center gap-4 bg-stone-50 p-4 rounded-2xl border border-stone-100">
+                        <span class="emoji-icon">🍎</span>
+                        <div><div class="text-xs text-stone-500 font-bold uppercase">Buah</div><div class="font-heading font-extrabold text-xl text-red-600"><span id="p-fruit">0</span> <span class="text-xs">cup</span></div></div>
+                    </div>
+                    <div class="flex items-center gap-4 bg-stone-50 p-4 rounded-2xl border border-stone-100">
+                        <span class="emoji-icon">🥦</span>
+                        <div><div class="text-xs text-stone-500 font-bold uppercase">Sayuran</div><div class="font-heading font-extrabold text-xl text-green-600"><span id="p-veg">0</span> <span class="text-xs">cup</span></div></div>
+                    </div>
+                    <div class="flex items-center gap-4 bg-stone-50 p-4 rounded-2xl border border-stone-100">
+                        <span class="emoji-icon">🥛</span>
+                        <div><div class="text-xs text-stone-500 font-bold uppercase">Susu/Dairy</div><div class="font-heading font-extrabold text-xl text-blue-600"><span id="p-dairy">0</span> <span class="text-xs">cup</span></div></div>
+                    </div>
+                    <div class="flex items-center gap-4 bg-stone-50 p-4 rounded-2xl border border-stone-100">
+                        <span class="emoji-icon">🫒</span>
+                        <div><div class="text-xs text-stone-500 font-bold uppercase">Minyak Sehat</div><div class="font-heading font-extrabold text-xl text-stone-600"><span id="p-oil">0</span> <span class="text-xs">gram</span></div></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- LOGIC JAVASCRIPT -->
     <script>
-        let kaloriTotal = 0;
+        let calculatedData = {};
 
-        function mulaiHitung() {
-            let u = document.getElementById("umur").value;
-            let b = document.getElementById("berat").value;
-            let t = document.getElementById("tinggi").value;
-            let g = document.getElementById("gender").value;
-            let a = document.getElementById("aktivitas").value;
+        function startCalculation() {
+            let gender = document.getElementById("gender").value;
+            let age = document.getElementById("age").value;
+            let weight = document.getElementById("weight").value;
+            let height = document.getElementById("height").value;
+            let activity = document.querySelector('input[name="activity"]:checked').value;
 
-            if (u == "" || b == "" || t == "") {
-                alert("Lengkapi semua data dulu ya!");
+            if(!age || !weight || !height) {
+                alert("Harap isi Umur, Berat, dan Tinggi Badan!");
                 return;
             }
 
-            // Rumus BMR (Mifflin-St Jeor) biar lebih akurat
-            let bmr = 0;
-            if (g === "pria") {
-                bmr = (10 * b) + (6.25 * t) - (5 * u) + 5;
-            } else {
-                bmr = (10 * b) + (6.25 * t) - (5 * u) - 161;
-            }
-
-            // Hitung TDEE (Total Kalori Harian)
-            kaloriTotal = Math.round(bmr * parseFloat(a));
-
-            // Sembunyikan form, mulai fake loading
-            document.getElementById("form-step").classList.remove("active");
-            document.getElementById("loading-step").classList.add("active");
-
-            // Efek ganti teks tiap 1.5 detik
-            setTimeout(() => { document.getElementById("teks-loading").innerText = "Menyusun rasio MyPlate... 📊"; }, 1500);
-            setTimeout(() => { document.getElementById("teks-loading").innerText = "Mencari rekomendasi kalori terbaik... 🔍"; }, 3000);
+            // 1. Hitung BMI
+            let heightM = height / 100;
+            let bmi = (weight / (heightM * heightM)).toFixed(1);
+            let bmiCat = "Normal"; let bmiColor = "bg-emerald-500"; let needleAngle = 0;
             
-            // Setelah 4.5 detik, munculin tombol iklan
+            // Logika Sudut Jarum Gauge BMI (15 ke 45 = 180 derajat)
+            let angleBase = ((bmi - 15) / 30) * 180;
+            if(angleBase < 0) angleBase = 0; if(angleBase > 180) angleBase = 180;
+            // -90 derajat itu ke kiri, +90 itu ke kanan
+            needleAngle = angleBase - 90;
+
+            if (bmi < 18.5) { bmiCat = "Underweight"; bmiColor = "bg-blue-500"; }
+            else if (bmi >= 18.5 && bmi <= 24.9) { bmiCat = "Normal"; bmiColor = "bg-green-500"; }
+            else if (bmi >= 25 && bmi <= 29.9) { bmiCat = "Overweight"; bmiColor = "bg-amber-500"; }
+            else { bmiCat = "Obese"; bmiColor = "bg-red-500"; }
+
+            // 2. Hitung Kalori (BMR Mifflin-St Jeor x Activity)
+            let bmr = (gender === "male") 
+                ? (10 * weight) + (6.25 * height) - (5 * age) + 5 
+                : (10 * weight) + (6.25 * height) - (5 * age) - 161;
+            let tdee = Math.round(bmr * parseFloat(activity));
+
+            // 3. Skala Porsi MyPlate (Basis 2000 Kalori = scale 1.0)
+            let scale = tdee / 2000;
+            let pGrains = Math.round(6 * scale);
+            let pProtein = Math.round(5.5 * scale);
+            let pFruit = (2 * scale).toFixed(1);
+            let pVeg = (2.5 * scale).toFixed(1);
+            let pDairy = (3 * scale).toFixed(1); // Susu biasanya max 3
+            if(pDairy > 3) pDairy = 3;
+            let pOil = Math.round(27 * scale);
+
+            // Simpan data untuk dirender nanti
+            calculatedData = { bmi, bmiCat, bmiColor, needleAngle, tdee, pGrains, pProtein, pFruit, pVeg, pDairy, pOil };
+
+            // Pindah UI ke Fake Loading
+            document.getElementById("step-form").classList.remove("active");
+            document.getElementById("step-loading").classList.add("active");
+
+            // Efek Loading Keren
+            setTimeout(() => { document.getElementById("loading-text").innerText = "Menghitung BMI..."; }, 1500);
+            setTimeout(() => { document.getElementById("loading-text").innerText = "Menyusun Piring Makan..."; }, 3000);
             setTimeout(() => {
-                document.getElementById("loading-step").classList.remove("active");
-                document.getElementById("ad-step").classList.add("active");
+                document.getElementById("step-loading").classList.remove("active");
+                document.getElementById("step-lock").classList.add("active");
             }, 4500);
         }
 
-        function bukaIklanDanHasil(adLink) {
-            // Buka Iklan Adsterra
+        function unlockResults(adLink) {
+            // 1. Buka Iklan Adsterra
             window.open(adLink, '_blank');
 
-            // Buka Hasil di halaman ini
-            document.getElementById("ad-step").classList.remove("active");
-            document.getElementById("result-step").classList.add("active");
+            // 2. Inject Data Hasil
+            document.getElementById("res-calories").innerText = calculatedData.tdee.toLocaleString('id-ID');
+            document.getElementById("res-bmi").innerText = calculatedData.bmi;
             
-            document.getElementById("hasil-kalori").innerHTML = "Kebutuhan Kalori Harian: " + kaloriTotal + " Kkal🔥";
+            let badge = document.getElementById("res-bmi-badge");
+            badge.innerText = calculatedData.bmiCat;
+            badge.className = `px-3 py-1 rounded-full text-xs font-bold text-white ${calculatedData.bmiColor}`;
+            
+            // Putar jarum BMI
+            document.getElementById("bmi-needle").setAttribute("transform", `rotate(${calculatedData.needleAngle} 120 110)`);
+
+            document.getElementById("p-grain").innerText = calculatedData.pGrains;
+            document.getElementById("p-protein").innerText = calculatedData.pProtein;
+            document.getElementById("p-fruit").innerText = calculatedData.pFruit;
+            document.getElementById("p-veg").innerText = calculatedData.pVeg;
+            document.getElementById("p-dairy").innerText = calculatedData.pDairy;
+            document.getElementById("p-oil").innerText = calculatedData.pOil;
+
+            // 3. Tampilkan Hasil
+            document.getElementById("step-lock").classList.remove("active");
+            document.getElementById("step-results").classList.add("active");
         }
     </script>
-
 </body>
 </html>
