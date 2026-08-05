@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Gizi & Diet Plan</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; }
+        .box { border: 1px solid #ccc; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+        input, select, button { width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; }
+        button { background-color: #28a745; color: white; border: none; font-weight: bold; cursor: pointer; }
+        .btn-ad { background-color: #dc3545; }
+        #ad-step, #result-step { display: none; }
+    </style>
+</head>
+<body>
+
+    <h2>Kalkulator Gizi Harian 🥗</h2>
+
+    <!-- Form Input Data -->
+    <div class="box" id="form-step">
+        <label>Berat Badan (kg):</label>
+        <input type="number" id="berat" placeholder="Contoh: 60">
+
+        <label>Tinggi Badan (cm):</label>
+        <input type="number" id="tinggi" placeholder="Contoh: 165">
+
+        <button onclick="prosesData()">Hitung Kebutuhan Gizi</button>
+    </div>
+
+    <!-- Step Wajib Klik Iklan -->
+    <div class="box" id="ad-step">
+        <h3>Sedang menyusun plan... ⏳</h3>
+        <p>Data kamu sudah dihitung! Silakan klik tombol di bawah untuk membuka hasil Diet Plan kamu.</p>
+        <!-- Ganti LINK_ADSTERRA_KAMU_DISINI dengan Direct Link dari Adsterra -->
+        <button class="btn-ad" onclick="bukaIklanDanHasil('LINK_ADSTERRA_KAMU_DISINI')">Buka Hasil Plan Saya</button>
+    </div>
+
+    <!-- Hasil Kalkulasi (Awalnya Disembunyikan) -->
+    <div class="box" id="result-step">
+        <h3>✅ Hasil Plan Gizi Kamu</h3>
+        <p id="hasil-teks"></p>
+        <p><strong>Tips:</strong> Perbanyak minum air putih dan jaga pola tidur!</p>
+    </div>
+
+    <script>
+        let kaloriHarian = 0;
+
+        // Fungsi saat user klik tombol Hitung
+        function prosesData() {
+            let b = document.getElementById("berat").value;
+            let t = document.getElementById("tinggi").value;
+
+            if (b == "" || t == "") {
+                alert("Isi berat dan tinggi badan dulu, ya!");
+                return;
+            }
+
+            // Rumus BMR super sederhana (bisa kamu ganti dengan rumus Harris-Benedict yang asli)
+            kaloriHarian = (b * 10) + (t * 6.25) + 500; 
+
+            // Sembunyikan form, munculkan tombol iklan
+            document.getElementById("form-step").style.display = "none";
+            document.getElementById("ad-step").style.display = "block";
+        }
+
+        // Fungsi saat user klik tombol Buka Hasil (Sistem Adsterra)
+        function bukaIklanDanHasil(adLink) {
+            // 1. Buka iklan Adsterra di tab baru
+            window.open(adLink, '_blank');
+
+            // 2. Ubah tampilan web kita untuk menampilkan hasil
+            document.getElementById("ad-step").style.display = "none";
+            document.getElementById("result-step").style.display = "block";
+            
+            // 3. Tampilkan hasil angkanya
+            document.getElementById("hasil-teks").innerHTML = "Estimasi kebutuhan kalori harian kamu adalah: <strong>" + kaloriHarian + " Kkal</strong>. Kamu bisa defisit 300-500 kalori jika ingin menurunkan berat badan.";
+        }
+    </script>
+
+</body>
+</html>
